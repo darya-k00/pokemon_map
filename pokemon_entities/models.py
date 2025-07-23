@@ -1,49 +1,45 @@
-from django.db import models  # noqa F401
+from django.db import models
 
 
 class Pokemon(models.Model):
-    title_ru = models.CharField(max_length=200,
-                                verbose_name='имя покемона на русском',
-                                blank=True
-                                )
-    title_en = models.CharField(blank=True,
-                                max_length=200,
-                                verbose_name='имя покемона на английском'
-                                )
-    images = models.ImageField(blank=True,
-                               null=True,
-                               upload_to='pocemons_images/',
-                               verbose_name='изображение покемона'
-                               )
-    description = models.TextField(blank=True, verbose_name='описание')
+    title_ru = models.CharField(max_length=200, blank=False, verbose_name="Имя")
+    title_en = models.CharField(max_length=200, blank=True, verbose_name="Имя на анг")
+    title_jp = models.CharField(max_length=200, blank=True, verbose_name="Имя на яп")
+    image = models.ImageField(blank=True, null=True, verbose_name="файл картинки")
     previous_evolution = models.ForeignKey('self',
-                                           on_delete=models.CASCADE,
-                                           null=True, blank=True,
-                                           related_name='next_evolutions',
-                                           verbose_name='предыдущая эволюция покемона'
+                        on_delete=models.PROTECT,
+                        blank=True, null=True,
+                        related_name = "next_evolution",
+                        related_query_name = "next_evolution",
+                        verbose_name="Родитель",
                                            )
-
+    description = models.TextField(blank=True, verbose_name="Описание")
     def __str__(self):
         return self.title_ru
 
+    class Meta:
+        verbose_name = 'Покемон'
+        verbose_name_plural = 'Покемоны'
+
 
 class PokemonEntity(models.Model):
-    pokemon = models.ForeignKey(
-        Pokemon,
-        on_delete=models.CASCADE,
-        verbose_name='покемон',
-        related_name='entities'
-        )
-    lat = models.FloatField(verbose_name='Широта')
-    lon = models.FloatField(verbose_name='Долгота')
-    appear_at = models.DateTimeField(verbose_name='дата и время появления')
-    disappear_at = models.DateTimeField(blank=True,
-                                        null=True,
-                                        verbose_name='дата и время исчезновения'
-                                        )
-    level = models.PositiveIntegerField(null=True, blank=True, verbose_name="Уровень")
-    health = models.PositiveIntegerField(null=True, blank=True, verbose_name="Здоровье")
-    strength = models.PositiveIntegerField(null=True, blank=True, verbose_name="Атака")
-    defence = models.PositiveIntegerField(null=True, blank=True, verbose_name="Защита")
-    stamina = models.PositiveIntegerField(null=True, blank=True, verbose_name="Выносливость")
-# your models here
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.PROTECT, null=False,blank=False,
+                                related_name="kind_pokemon",
+                                verbose_name='покемон')
+    lat = models.FloatField(verbose_name='широта', blank=False,)
+    lon = models.FloatField(verbose_name='долгота', blank=False,)
+    appeared_at = models.DateTimeField(blank=True, null=True, verbose_name='появится')
+    disappeared_at = models.DateTimeField(blank=True, null=True, verbose_name='исчезнет')
+    level = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='уровень')
+    health = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='здоровье')
+    strength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='атака')
+    defence = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='защита')
+    stamina = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='выносливость')
+
+    class Meta:
+        verbose_name = 'Покемоны на карте'
+        verbose_name_plural = 'Покемоны на карте'
+
+    def __str__(self):
+        title = '{0} id {1}'.format(self.pokemon.title, self.id)
+        return title
