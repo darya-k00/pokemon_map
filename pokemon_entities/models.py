@@ -5,7 +5,7 @@ class Pokemon(models.Model):
     title_ru = models.CharField(max_length=200, blank=False, verbose_name="Имя")
     title_en = models.CharField(max_length=200, blank=True, verbose_name="Имя на анг")
     title_jp = models.CharField(max_length=200, blank=True, verbose_name="Имя на яп")
-    image = models.ImageField(blank=True, null=True, verbose_name="файл картинки")
+    image = models.ImageField(blank=True, null=True, upload_to='pocemons_images/', verbose_name="файл картинки")
     previous_evolution = models.ForeignKey('self',
                         on_delete=models.PROTECT,
                         blank=True, null=True,
