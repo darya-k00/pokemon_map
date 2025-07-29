@@ -29,31 +29,33 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
-    pokemons_enties = PokemonEntity.objects.all()
+    pokemon_entites = PokemonEntity.objects.all()
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     
-    for pokemon_entity in pokemons_enties:
+    for pokemon_entity in pokemon_entites:
         pokemon = pokemon_entity.pokemon.title_ru
         if (pokemon_entity.appear_at <= timezone.now()) and (pokemon_entity.disappear_at >= timezone.now()):
-            try:
-                add_pokemon(
-                    folium_map,
-                    pokemon_entity.lat,
-                    pokemon_entity.lon,
-                    request.build_absolute_uri(pokemon_entity.pokemon.images.url)
-                )
-            except ValueError:
-                continue
+            if pokemon_entity.pokemon.image is not None:
+                try:
+                    add_pokemon(
+                        folium_map,
+                        pokemon_entity.lat,
+                        pokemon_entity.lon,
+                        request.build_absolute_uri(pokemon_entity.pokemon.image.url)
+                    )
+                except ValueError:
+                    continue
 
     pokemons_on_page = []
     for pokemon in pokemons:
         try:
-            pokemons_on_page.append({
-                'pokemon_id': pokemon.id,
-                'img_url': pokemon.images.url,
-                'title_ru': pokemon.title_ru
-            })
+            if pokemon.image is not None:
+                pokemons_on_page.append({
+                    'pokemon_id': pokemon.id,
+                    'img_url': pokemon.image.url,
+                    'title_ru': pokemon.title_ru
+                })
         except ValueError:
             continue
 
@@ -73,11 +75,11 @@ def show_pokemon(request, pokemon_id):
             folium_map,
             pokemon_entity.lat,
             pokemon_entity.lon,
-            request.build_absolute_uri(pokemon.images.url)
+            request.build_absolute_uri(pokemon.image.url)
         )
 
         pokemon_info = {
-            'img_url': request.build_absolute_uri(pokemon.images.url),
+            'img_url': request.build_absolute_uri(pokemon.image.url),
             'title_ru': pokemon.title_ru,
             'title_en': pokemon.title_en,
             'title_jp': pokemon.title_jp,
@@ -89,7 +91,7 @@ def show_pokemon(request, pokemon_id):
             pokemon_info['previous_evolution'] = {
                 'pokemon_id': pokemon.previous_evolution.id,
                 'img_url': request.build_absolute_uri(
-                    pokemon.previous_evolution.images.url),
+                    pokemon.previous_evolution.image.url),
                 'title_ru': pokemon.previous_evolution.title_ru,
                 'title_en': pokemon.previous_evolution.title_en,
                 'title_jp': pokemon.previous_evolution.title_jp
@@ -98,7 +100,7 @@ def show_pokemon(request, pokemon_id):
         if next_evolution:
             next_evolution = {
                 'pokemon_id': next_evolution.id,
-                'img_url': request.build_absolute_uri(next_evolution.images.url),
+                'img_url': request.build_absolute_uri(next_evolution.image.url),
                 'title_ru': next_evolution.title_ru
             }
             pokemon_info['next_evolution'] = next_evolution
