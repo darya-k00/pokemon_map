@@ -36,7 +36,7 @@ def show_all_pokemons(request):
     for pokemon_entity in pokemon_entites:
         pokemon = pokemon_entity.pokemon.title_ru
         if (pokemon_entity.appear_at <= timezone.now()) and (pokemon_entity.disappear_at >= timezone.now()):
-            if pokemon_entity.pokemon.image is not None:
+            if pokemon_entity.pokemon.image :
                 try:
                     add_pokemon(
                         folium_map,
@@ -50,7 +50,7 @@ def show_all_pokemons(request):
     pokemons_on_page = []
     for pokemon in pokemons:
         try:
-            if pokemon.image is not None:
+            if pokemon.image :
                 pokemons_on_page.append({
                     'pokemon_id': pokemon.id,
                     'img_url': pokemon.image.url,
